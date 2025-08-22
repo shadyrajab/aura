@@ -1,7 +1,4 @@
-import {
-  ChatInputCommandInteraction,
-  EmbedBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { DataSource } from "typeorm";
 import { User } from "../models/user";
 

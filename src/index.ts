@@ -2,10 +2,7 @@ import { Client, EmbedBuilder } from "discord.js";
 import { config } from "dotenv";
 import { DataSource } from "typeorm";
 import { User } from "./models/user";
-import {
-  AuraRankingExecute,
-  AuraRankingData,
-} from "./commands/topaura";
+import { AuraRankingExecute, AuraRankingData } from "./commands/topaura";
 import { ClearAuraData, ClearAuraExecute } from "./commands/clearaura";
 
 config();
@@ -110,7 +107,7 @@ client.on("messageCreate", async (message) => {
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   if (interaction.commandName === "clearaura") {
-    await ClearAuraExecute(interaction, AppDataSource)
+    await ClearAuraExecute(interaction, AppDataSource);
   }
   if (interaction.commandName === "topaura") {
     await AuraRankingExecute(interaction, AppDataSource);
