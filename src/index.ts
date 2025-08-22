@@ -3,11 +3,10 @@ import { config } from "dotenv";
 import { DataSource } from "typeorm";
 import { User } from "./models/user";
 import {
-  AuraExecute,
   AuraRankingExecute,
-  AuraData,
   AuraRankingData,
-} from "./commands/aura";
+} from "./commands/topaura";
+import { ClearAuraData, ClearAuraExecute } from "./commands/clearaura";
 
 config();
 
@@ -29,7 +28,7 @@ const AppDataSource = new DataSource({
 
 client.on("ready", async (client) => {
   console.log(`Bot ${client.user.username} is online`);
-  client.application.commands.set([AuraData, AuraRankingData]);
+  client.application.commands.set([AuraRankingData, ClearAuraData]);
   await AppDataSource.initialize();
 });
 
@@ -61,17 +60,23 @@ client.on("messageCreate", async (message) => {
     });
   }
 
-  if (
-    user.updatedAt &&
-    user.updatedAt.toLocaleDateString() ===
-      message.createdAt.toLocaleDateString()
-  )
-    return await message.reply({
-      content: "Tu já farmou aura hoje! Volte amanhã.",
-    });
+  const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+  if (user.updatedAt) {
+    const last = new Date(user.updatedAt).getTime();
+    const elapsed = Date.now() - last;
+
+    if (elapsed < TWELVE_HOURS_MS) {
+      const remaining = TWELVE_HOURS_MS - elapsed;
+      const hours = Math.floor(remaining / (60 * 60 * 1000));
+      const minutes = Math.ceil((remaining % (60 * 60 * 1000)) / (60 * 1000));
+      return await message.reply({
+        content: `Tu já farmou aura há pouco tempo! Tenta de novo em ${hours}h ${minutes}min.`,
+      });
+    }
+  }
 
   user.aura = (user.aura || 0) + 1;
-  user.updatedAt = message.createdAt;
+  user.updatedAt = new Date();
 
   await userRepository.save(user);
   const embed = new EmbedBuilder()
@@ -93,7 +98,7 @@ client.on("messageCreate", async (message) => {
       },
       {
         name: "**🏆 Posição no Ranking:**",
-        value: user.position.toString() + "º lugar",
+        value: (user.position + 1).toString() + "º lugar",
         inline: true,
       },
     ])
@@ -104,8 +109,8 @@ client.on("messageCreate", async (message) => {
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-  if (interaction.commandName === "aura") {
-    await AuraExecute(interaction, AppDataSource);
+  if (interaction.commandName === "clearaura") {
+    await ClearAuraExecute(interaction, AppDataSource)
   }
   if (interaction.commandName === "topaura") {
     await AuraRankingExecute(interaction, AppDataSource);

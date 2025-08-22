@@ -1,69 +1,13 @@
 import {
-  ApplicationCommandOptionType,
   ChatInputCommandInteraction,
   EmbedBuilder,
 } from "discord.js";
 import { DataSource } from "typeorm";
 import { User } from "../models/user";
 
-export const AuraData = {
-  name: "aura",
-  description: "Paga o dia de hoje e farma uma aura",
-  options: [
-    {
-      name: "pagamento",
-      description: "Foto comprovando o pagamento de cada dia nos dai hoje",
-      type: ApplicationCommandOptionType.Attachment,
-      required: true,
-    },
-  ],
-};
-
 export const AuraRankingData = {
   name: "topaura",
   description: "Ranking de aura do servidor",
-};
-
-export const AuraExecute = async (
-  interaction: ChatInputCommandInteraction,
-  dataSource: DataSource,
-) => {
-  const userId = interaction.user.id;
-  const userRepository = dataSource.getRepository(User);
-
-  let user = await userRepository.findOneBy({ discordId: userId });
-
-  if (!user) {
-    user = userRepository.create({
-      aura: 0,
-      discordId: userId,
-    });
-  }
-
-  const image = interaction.options.getAttachment("pagamento");
-
-  if (!image)
-    return await interaction.reply({
-      content: "Imagem não reconhecida",
-      ephemeral: true,
-    });
-
-  user.aura = (user.aura || 0) + 10;
-
-  const embed = new EmbedBuilder()
-    .setImage(image.url)
-    .setFooter({
-      text: interaction.user.username,
-      iconURL: interaction.user.displayAvatarURL(),
-    })
-    .setDescription(`**Aura total: ${user.aura} 💪 **`)
-    .setColor("#00FF00")
-    .setTimestamp();
-
-  await userRepository.save(user);
-  await interaction.reply({
-    embeds: [embed],
-  });
 };
 
 export const AuraRankingExecute = async (
