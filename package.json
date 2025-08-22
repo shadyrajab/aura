@@ -14,8 +14,7 @@
   "scripts": {
     "format": "prettier --write .",
     "build": "tsc",
-    "clean": "rmdir /s /q dist",
     "run": "node dist/index.js",
-    "start": "npm run format && npm run clean && npm run build && npm run run"
+    "start": "npm run build && npm run run"
   }
 }

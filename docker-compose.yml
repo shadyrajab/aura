@@ -3,16 +3,45 @@ version: "3.9"
 services:
   postgres:
     image: postgres:16
-    container_name: postgres_db
-    restart: always
+    container_name: postgres_aura
+    command: -c port=5433
+    ports:
+      - "5433:5433"
     environment:
       POSTGRES_USER: shady
       POSTGRES_PASSWORD: shady
       POSTGRES_DB: shady
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shady"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aura_bot
+    ports:
+      - "3008:3008"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5433
+      DB_USER: shady
+      DB_PASSWORD: shady
+      DB_NAME: shady
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres_data:
