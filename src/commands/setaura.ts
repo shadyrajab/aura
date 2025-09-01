@@ -51,7 +51,6 @@ export const SetAuraExecute = async (
     });
   } else {
     user.aura = auraValue;
-    user.updatedAt = new Date();
   }
 
   await userRepository.save(user);
