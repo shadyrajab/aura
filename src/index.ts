@@ -6,6 +6,7 @@ import { NoFap } from "./models/nofap";
 import { GuildConfig } from "./models/guildConfig";
 import { AuraRankingExecute, AuraRankingData } from "./commands/topaura";
 import { ClearAuraData, ClearAuraExecute } from "./commands/clearaura";
+import { SetAuraData, SetAuraExecute } from "./commands/setaura";
 import { NoFapData, NoFapExecute, handleNoFapButton } from "./commands/nofap";
 import { SchedulerService } from "./services/scheduler";
 
@@ -29,7 +30,7 @@ const AppDataSource = new DataSource({
 
 client.on("ready", async (client) => {
   console.log(`Bot ${client.user.username} is online`);
-  client.application.commands.set([AuraRankingData, ClearAuraData, NoFapData]);
+  client.application.commands.set([AuraRankingData, ClearAuraData, SetAuraData, NoFapData]);
   await AppDataSource.initialize();
   
   const scheduler = new SchedulerService(client, AppDataSource);
@@ -122,6 +123,9 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
     if (interaction.commandName === "clearaura") {
       await ClearAuraExecute(interaction, AppDataSource);
+    }
+    if (interaction.commandName === "setaura") {
+      await SetAuraExecute(interaction, AppDataSource);
     }
     if (interaction.commandName === "topaura") {
       await AuraRankingExecute(interaction, AppDataSource);
