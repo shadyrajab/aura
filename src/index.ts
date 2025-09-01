@@ -2,8 +2,12 @@ import { Client, EmbedBuilder } from "discord.js";
 import { config } from "dotenv";
 import { DataSource } from "typeorm";
 import { User } from "./models/user";
+import { NoFap } from "./models/nofap";
+import { GuildConfig } from "./models/guildConfig";
 import { AuraRankingExecute, AuraRankingData } from "./commands/topaura";
 import { ClearAuraData, ClearAuraExecute } from "./commands/clearaura";
+import { NoFapData, NoFapExecute, handleNoFapButton } from "./commands/nofap";
+import { SchedulerService } from "./services/scheduler";
 
 config();
 
@@ -20,13 +24,23 @@ const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [User],
+  entities: [User, NoFap, GuildConfig],
 });
 
 client.on("ready", async (client) => {
   console.log(`Bot ${client.user.username} is online`);
-  client.application.commands.set([AuraRankingData, ClearAuraData]);
+  client.application.commands.set([AuraRankingData, ClearAuraData, NoFapData]);
   await AppDataSource.initialize();
+  
+  const scheduler = new SchedulerService(client, AppDataSource);
+  scheduler.startDailyCheckIn();
+  
+  client.on("messageCreate", async (testMessage) => {
+    if (testMessage.content === "!testnofap" && !testMessage.author.bot) {
+      await scheduler.testSendCheckIn();
+      await testMessage.reply("✅ Teste de check-in enviado!");
+    }
+  });
 });
 
 client.on("messageCreate", async (message) => {
@@ -105,12 +119,20 @@ client.on("messageCreate", async (message) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
-  if (interaction.commandName === "clearaura") {
-    await ClearAuraExecute(interaction, AppDataSource);
+  if (interaction.isChatInputCommand()) {
+    if (interaction.commandName === "clearaura") {
+      await ClearAuraExecute(interaction, AppDataSource);
+    }
+    if (interaction.commandName === "topaura") {
+      await AuraRankingExecute(interaction, AppDataSource);
+    }
+    if (interaction.commandName === "nofap") {
+      await NoFapExecute(interaction, AppDataSource);
+    }
   }
-  if (interaction.commandName === "topaura") {
-    await AuraRankingExecute(interaction, AppDataSource);
+  
+  if (interaction.isButton() && (interaction.customId === "nofap_safe" || interaction.customId === "nofap_lost")) {
+    await handleNoFapButton(interaction, AppDataSource);
   }
 });
 

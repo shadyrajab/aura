@@ -13,7 +13,7 @@ export class User {
   @Column({ unique: true })
   discordId: string;
 
-  @Column()
+  @Column({ type: "float", default: 0 })
   aura: number;
 
   @UpdateDateColumn()
