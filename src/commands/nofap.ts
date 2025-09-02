@@ -257,7 +257,7 @@ export async function handleNoFapButton(
   const noFapRepository = dataSource.getRepository(NoFap);
   const userRepository = dataSource.getRepository(User);
   const userId = interaction.user.id;
-  const today = new Date();
+  const today = new Date(new Date().toLocaleString('en-us', { timeZone: 'America/Sao_Paulo' }));
   today.setHours(0, 0, 0, 0);
 
   let userProgress = await noFapRepository.findOne({
@@ -324,7 +324,7 @@ export async function handleNoFapButton(
     const auraReward = getAuraReward(userProgress.currentStreak);
     const progressionMsg = getProgressionMessage(userProgress.currentStreak);
     
-    auraUser.aura = (auraUser.aura || 0) + auraReward;
+    auraUser.aura = parseFloat(((auraUser.aura || 0) + auraReward).toFixed(2));
     auraUser.updatedAt = new Date();
     await userRepository.save(auraUser);
 
