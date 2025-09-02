@@ -283,6 +283,9 @@ export async function handleNoFapButton(
     });
   }
 
+  console.log(new Date(userProgress.lastCheckIn!).getTime())
+  console.log(today.getTime())
+
   if (
     userProgress.lastCheckIn &&
     new Date(userProgress.lastCheckIn).getTime() === today.getTime()
