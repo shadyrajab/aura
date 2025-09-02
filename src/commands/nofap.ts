@@ -283,12 +283,9 @@ export async function handleNoFapButton(
     });
   }
 
-  console.log(new Date(userProgress.lastCheckIn!).getTime())
-  console.log(today.getTime())
-
   if (
     userProgress.lastCheckIn &&
-    new Date(userProgress.lastCheckIn).getTime() === today.getTime()
+    new Date(userProgress.lastCheckIn).getDay() === today.getDay()
   ) {
     return await interaction.reply({
       content: "Você já fez seu check-in hoje! Volte amanhã. 😊",
