@@ -257,7 +257,7 @@ export async function handleNoFapButton(
   const noFapRepository = dataSource.getRepository(NoFap);
   const userRepository = dataSource.getRepository(User);
   const userId = interaction.user.id;
-  const today = new Date(new Date().toLocaleString('en-us', { timeZone: 'America/Sao_Paulo' }));
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   let userProgress = await noFapRepository.findOne({
