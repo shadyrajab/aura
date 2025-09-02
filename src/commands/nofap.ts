@@ -257,8 +257,12 @@ export async function handleNoFapButton(
   const noFapRepository = dataSource.getRepository(NoFap);
   const userRepository = dataSource.getRepository(User);
   const userId = interaction.user.id;
+
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const brazilOffset = -3 * 60; 
+  const utcTime = today.getTime() + (today.getTimezoneOffset() * 60000);
+  const brazilTime = new Date(utcTime + (brazilOffset * 60000));
+  brazilTime.setHours(0, 0, 0, 0);
 
   let userProgress = await noFapRepository.findOne({
     where: { discordId: userId },
@@ -283,18 +287,17 @@ export async function handleNoFapButton(
     });
   }
 
-  console.log(userProgress.lastCheckIn?.getDay())
-  console.log(today.getDay())
-  console.log(new Date(today.toLocaleString('en-us', { timeZone: 'America/Sao_Paulo' })).getDay())
-  console.log(new Date(today.toLocaleString('en-us', { timeZone: 'America/Los_Angeles' })).getDay())
-  if (
-    userProgress.lastCheckIn &&
-    new Date(userProgress.lastCheckIn).getDay() === today.getDay()
-  ) {
-    return await interaction.reply({
-      content: "Você já fez seu check-in hoje! Volte amanhã. 😊",
-      ephemeral: true,
-    });
+  if (userProgress.lastCheckIn) {
+    const lastCheckInDate = new Date(userProgress.lastCheckIn);
+    const lastCheckInBrazil = new Date(lastCheckInDate.getTime() + (brazilOffset * 60000));
+    lastCheckInBrazil.setHours(0, 0, 0, 0);
+    
+    if (lastCheckInBrazil.getTime() === brazilTime.getTime()) {
+      return await interaction.reply({
+        content: "Você já fez seu check-in hoje! Volte amanhã. 😊",
+        ephemeral: true,
+      });
+    }
   }
 
   let auraUser = await userRepository.findOne({
@@ -318,7 +321,7 @@ export async function handleNoFapButton(
     userProgress.isActive = true;
     
     if (!userProgress.streakStartDate) {
-      userProgress.streakStartDate = today;
+      userProgress.streakStartDate = brazilTime;
     }
     
     if (userProgress.currentStreak > userProgress.bestStreak) {
@@ -352,7 +355,7 @@ export async function handleNoFapButton(
     });
   }
 
-  userProgress.lastCheckIn = today;
+  userProgress.lastCheckIn = brazilTime;
   await noFapRepository.save(userProgress);
 }
 
