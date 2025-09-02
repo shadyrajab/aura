@@ -15,16 +15,22 @@ export class SchedulerService {
 
   startDailyCheckIn() {
     const now = new Date();
-    const next1AM = new Date();
+    const nowInBR = new Date(
+      now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+    );
+
+    const next1AM = new Date(
+      now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+    );
     next1AM.setHours(1, 0, 0, 0);
-    
-    if (now > next1AM) {
+
+    if (nowInBR >= next1AM) {
       next1AM.setDate(next1AM.getDate() + 1);
     }
 
     const timeUntilNext1AM = next1AM.getTime() - now.getTime();
 
-    console.log(`⏰ Próximo check-in No Fap agendado para: ${next1AM.toLocaleString('pt-BR')}`);
+    console.log(`⏰ Próximo check-in No Fap agendado para: ${next1AM.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`);
 
     setTimeout(() => {
       this.sendDailyCheckIn();
