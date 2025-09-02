@@ -283,6 +283,7 @@ export async function handleNoFapButton(
     });
   }
 
+  console.log(userProgress.lastCheckIn?.getDay())
   console.log(today.getDay())
   console.log(new Date(today.toLocaleString('en-us', { timeZone: 'America/Sao_Paulo' })).getDay())
   console.log(new Date(today.toLocaleString('en-us', { timeZone: 'America/Los_Angeles' })).getDay())
