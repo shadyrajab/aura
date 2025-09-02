@@ -18,7 +18,7 @@ export class SchedulerService {
     const next1AM = new Date();
     next1AM.setHours(1, 0, 0, 0);
     
-    if (now.getHours() >= 1) {
+    if (now > next1AM) {
       next1AM.setDate(next1AM.getDate() + 1);
     }
 
