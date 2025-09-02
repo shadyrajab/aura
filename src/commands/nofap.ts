@@ -332,7 +332,6 @@ export async function handleNoFapButton(
     const progressionMsg = getProgressionMessage(userProgress.currentStreak);
     
     auraUser.aura = parseFloat(((auraUser.aura || 0) + auraReward).toFixed(2));
-    auraUser.updatedAt = new Date();
     await userRepository.save(auraUser);
 
     await interaction.reply({
@@ -346,7 +345,6 @@ export async function handleNoFapButton(
     userProgress.streakStartDate = null;
 
     auraUser.aura = Math.max(0, (auraUser.aura || 0) - 15);
-    auraUser.updatedAt = new Date();
     await userRepository.save(auraUser);
 
     await interaction.reply({
