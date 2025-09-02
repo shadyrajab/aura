@@ -289,10 +289,10 @@ export async function handleNoFapButton(
 
   if (userProgress.lastCheckIn) {
     const lastCheckInDate = new Date(userProgress.lastCheckIn);
-    const lastCheckInBrazil = new Date(lastCheckInDate.getTime() + (brazilOffset * 60000));
-    lastCheckInBrazil.setHours(0, 0, 0, 0);
+    const lastCheckInDateString = lastCheckInDate.toISOString().split('T')[0];
+    const todayDateString = brazilTime.toISOString().split('T')[0];
     
-    if (lastCheckInBrazil.getTime() === brazilTime.getTime()) {
+    if (lastCheckInDateString === todayDateString) {
       return await interaction.reply({
         content: "Você já fez seu check-in hoje! Volte amanhã. 😊",
         ephemeral: true,
