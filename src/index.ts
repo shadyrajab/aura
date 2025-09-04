@@ -73,19 +73,19 @@ client.on("messageCreate", async (message) => {
   }
 
   const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
-  if (user.updatedAt) {
-    const last = new Date(user.updatedAt).getTime();
-    const elapsed = Date.now() - last;
+  // if (user.updatedAt) {
+  //   const last = new Date(user.updatedAt).getTime();
+  //   const elapsed = Date.now() - last;
 
-    if (elapsed < TWELVE_HOURS_MS) {
-      const remaining = TWELVE_HOURS_MS - elapsed;
-      const hours = Math.floor(remaining / (60 * 60 * 1000));
-      const minutes = Math.ceil((remaining % (60 * 60 * 1000)) / (60 * 1000));
-      return await message.reply({
-        content: `Tu já farmou aura há pouco tempo! Tenta de novo em ${hours}h ${minutes}min.`,
-      });
-    }
-  }
+  //   if (elapsed < TWELVE_HOURS_MS) {
+  //     const remaining = TWELVE_HOURS_MS - elapsed;
+  //     const hours = Math.floor(remaining / (60 * 60 * 1000));
+  //     const minutes = Math.ceil((remaining % (60 * 60 * 1000)) / (60 * 1000));
+  //     return await message.reply({
+  //       content: `Tu já farmou aura há pouco tempo! Tenta de novo em ${hours}h ${minutes}min.`,
+  //     });
+  //   }
+  // }
 
   user.aura = (user.aura || 0) + 1;
   user.updatedAt = new Date();
