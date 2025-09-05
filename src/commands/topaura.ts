@@ -16,6 +16,7 @@ export const AuraRankingExecute = async (
     order: { aura: "DESC" },
   });
 
+  const interactionReplied = await interaction.deferReply()
   if (topUsers.length === 0) {
     await interaction.reply({
       content: "Nenhum usuário com aura registrada ainda.",
@@ -42,5 +43,5 @@ export const AuraRankingExecute = async (
     .setColor("#00FF00")
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed], ephemeral: false });
+  await interactionReplied.edit({ embeds: [embed] });
 };
