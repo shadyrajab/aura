@@ -308,8 +308,7 @@ export async function handleNoFapButton(
     auraUser = userRepository.create({
       discordId: userId,
       aura: 0,
-      updatedAt: new Date(),
-      position: 0,
+      updatedAt: new Date()
     });
   }
 

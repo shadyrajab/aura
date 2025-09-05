@@ -47,7 +47,6 @@ export const SetAuraExecute = async (
       discordId: targetUser.id,
       aura: auraValue,
       updatedAt: new Date(),
-      position: 0,
     });
   } else {
     user.aura = auraValue;

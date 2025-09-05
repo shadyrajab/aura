@@ -18,7 +18,4 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date | null;
-
-  @Column({ type: "int", default: 0 })
-  position: number;
 }

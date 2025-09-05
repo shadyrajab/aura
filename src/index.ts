@@ -47,9 +47,10 @@ client.on("ready", async (client) => {
 client.on("messageCreate", async (message) => {
   const { channelId, attachments } = message;
 
-  if (message.author.id === "1404307068390867076") return;
+  if (message.author.bot) return;
   if (channelId !== "1401409124566040736") return;
   if (!attachments.size) return;
+
   const userRepository = AppDataSource.getRepository(User);
   const { id: userId, username } = message.author;
 
@@ -57,12 +58,7 @@ client.on("messageCreate", async (message) => {
     order: { aura: "DESC" },
   });
 
-  const rankedUsers = topUsers.map((u, index) => ({
-    ...u,
-    position: index + 1,
-  }));
-
-  let user = rankedUsers.find((rankedUser) => rankedUser.discordId === userId);
+  let user = topUsers.find((u) => u.discordId === userId);
 
   if (!user) {
     user = userRepository.create({
@@ -72,25 +68,17 @@ client.on("messageCreate", async (message) => {
     });
   }
 
-  const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
-  // if (user.updatedAt) {
-  //   const last = new Date(user.updatedAt).getTime();
-  //   const elapsed = Date.now() - last;
-
-  //   if (elapsed < TWELVE_HOURS_MS) {
-  //     const remaining = TWELVE_HOURS_MS - elapsed;
-  //     const hours = Math.floor(remaining / (60 * 60 * 1000));
-  //     const minutes = Math.ceil((remaining % (60 * 60 * 1000)) / (60 * 1000));
-  //     return await message.reply({
-  //       content: `Tu já farmou aura há pouco tempo! Tenta de novo em ${hours}h ${minutes}min.`,
-  //     });
-  //   }
-  // }
-
   user.aura = (user.aura || 0) + 1;
   user.updatedAt = new Date();
 
   await userRepository.save(user);
+
+  const updatedTopUsers = await userRepository.find({
+    order: { aura: "DESC" },
+  });
+
+  const position = updatedTopUsers.findIndex((u) => u.discordId === userId);
+
   const embed = new EmbedBuilder()
     .setFooter({
       text: `${username}`,
@@ -110,7 +98,7 @@ client.on("messageCreate", async (message) => {
       },
       {
         name: "**🏆 Posição no Ranking:**",
-        value: (user.position + 1).toString() + "º lugar",
+        value: (position + 1).toString() + "º lugar",
         inline: true,
       },
     ])
