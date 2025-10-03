@@ -7,8 +7,6 @@ import { GuildConfig } from "./models/guildConfig";
 import { AuraRankingExecute, AuraRankingData } from "./commands/topaura";
 import { ClearAuraData, ClearAuraExecute } from "./commands/clearaura";
 import { SetAuraData, SetAuraExecute } from "./commands/setaura";
-import { NoFapData, NoFapExecute, handleNoFapButton } from "./commands/nofap";
-import { SchedulerService } from "./services/scheduler";
 
 config();
 
@@ -30,18 +28,8 @@ const AppDataSource = new DataSource({
 
 client.on("ready", async (client) => {
   console.log(`Bot ${client.user.username} is online`);
-  client.application.commands.set([AuraRankingData, ClearAuraData, SetAuraData, NoFapData]);
+  client.application.commands.set([AuraRankingData, ClearAuraData, SetAuraData]);
   await AppDataSource.initialize();
-  
-  const scheduler = new SchedulerService(client, AppDataSource);
-  scheduler.startDailyCheckIn();
-  
-  client.on("messageCreate", async (testMessage) => {
-    if (testMessage.content === "!testnofap" && !testMessage.author.bot) {
-      await scheduler.testSendCheckIn();
-      await testMessage.reply("✅ Teste de check-in enviado!");
-    }
-  });
 });
 
 client.on("messageCreate", async (message) => {
@@ -118,13 +106,6 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "topaura") {
       await AuraRankingExecute(interaction, AppDataSource);
     }
-    if (interaction.commandName === "nofap") {
-      await NoFapExecute(interaction, AppDataSource);
-    }
-  }
-  
-  if (interaction.isButton() && (interaction.customId === "nofap_safe" || interaction.customId === "nofap_lost")) {
-    await handleNoFapButton(interaction, AppDataSource);
   }
 });
 
