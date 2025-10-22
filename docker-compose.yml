@@ -4,7 +4,6 @@ services:
   atropa-aura-postgres:
     image: postgres:16
     container_name: atropa-aura-postgres
-    command: -c port=5433
     restart: always
     ports:
       - "${POSTGRES_PORT}:5433"
