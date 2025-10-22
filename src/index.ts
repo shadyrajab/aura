@@ -2,7 +2,6 @@ import { Client, EmbedBuilder } from "discord.js";
 import { config } from "dotenv";
 import { DataSource } from "typeorm";
 import { User } from "./models/user";
-import { NoFap } from "./models/nofap";
 import { GuildConfig } from "./models/guildConfig";
 import { AuraRankingExecute, AuraRankingData } from "./commands/topaura";
 import { ClearAuraData, ClearAuraExecute } from "./commands/clearaura";
@@ -16,14 +15,14 @@ const client = new Client({
 
 const AppDataSource = new DataSource({
   type: "postgres",
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.POSTGRES_HOST,
+  port: Number(process.env.POSTGRES_PORT),
+  username: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
   synchronize: true,
   logging: false,
-  entities: [User, NoFap, GuildConfig],
+  entities: [User, GuildConfig],
 });
 
 client.on("ready", async (client) => {
