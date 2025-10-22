@@ -6,7 +6,7 @@ services:
     container_name: atropa-aura-postgres
     restart: always
     ports:
-      - "${POSTGRES_PORT}:5433"
+      - "${POSTGRES_PORT}:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -15,11 +15,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U shady"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   app:
     build:
