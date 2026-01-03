@@ -1,41 +1,47 @@
 import { Client, EmbedBuilder } from "discord.js";
-import { config } from "dotenv";
 import { DataSource } from "typeorm";
 import { User } from "./models/user";
 import { GuildConfig } from "./models/guildConfig";
+import { Event } from "./models/event";
+import { Winner } from "./models/winner";
 import { AuraRankingExecute, AuraRankingData } from "./commands/topaura";
 import { ClearAuraData, ClearAuraExecute } from "./commands/clearaura";
 import { SetAuraData, SetAuraExecute } from "./commands/setaura";
-
-config();
+import { WinnersData, WinnersExecute } from "./commands/winners";
+import { StartData, StartExecute } from "./commands/start";
+import { FinishData, FinishExecute } from "./commands/finish";
+import { setupTrashTalkingCron, sendPhotoRoast } from "./services/trashTalking";
+import { envs } from "./config/envs";
 
 const client = new Client({
   intents: ["Guilds", "GuildMembers", "GuildMessages", "MessageContent"],
 });
 
-const AppDataSource = new DataSource({
+export const AppDataSource = new DataSource({
   type: "postgres",
-  host: process.env.POSTGRES_HOST,
-  port: 5432,
-  username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
+  host: envs.POSTGRES_HOST,
+  port: parseInt(envs.POSTGRES_PORT),
+  username: envs.POSTGRES_USER,
+  password: envs.POSTGRES_PASSWORD,
+  database: envs.POSTGRES_DB,
   synchronize: true,
   logging: false,
-  entities: [User, GuildConfig],
+  entities: [User, GuildConfig, Event, Winner],
 });
 
 client.on("ready", async (client) => {
   console.log(`Bot ${client.user.username} is online`);
-  client.application.commands.set([AuraRankingData, ClearAuraData, SetAuraData]);
+  client.application.commands.set([AuraRankingData, ClearAuraData, SetAuraData, WinnersData, StartData, FinishData]);
   await AppDataSource.initialize();
+
+  setupTrashTalkingCron(client);
 });
 
 client.on("messageCreate", async (message) => {
   const { channelId, attachments } = message;
-
+  console.log(channelId)
   if (message.author.bot) return;
-  if (channelId !== "1401409124566040736") return;
+  if (channelId !== envs.AURA_CHANNEL_ID) return;
   if (!attachments.size) return;
 
   const userRepository = AppDataSource.getRepository(User);
@@ -66,6 +72,8 @@ client.on("messageCreate", async (message) => {
 
   const position = updatedTopUsers.findIndex((u) => u.discordId === userId);
 
+  const roastMessage = sendPhotoRoast(client, userId);
+
   const embed = new EmbedBuilder()
     .setFooter({
       text: `${username}`,
@@ -91,7 +99,7 @@ client.on("messageCreate", async (message) => {
     ])
     .setColor("#00FF00");
 
-  await message.reply({ embeds: [embed], content: "**+1** de aura! 💪" });
+  await message.reply({ embeds: [embed], content: `**+1** de aura! 💪\n\n${roastMessage}` });
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -105,7 +113,16 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "topaura") {
       await AuraRankingExecute(interaction, AppDataSource);
     }
+    if (interaction.commandName === "winners") {
+      await WinnersExecute(interaction, AppDataSource);
+    }
+    if (interaction.commandName === "start") {
+      await StartExecute(interaction, AppDataSource);
+    }
+    if (interaction.commandName === "finish") {
+      await FinishExecute(interaction, AppDataSource);
+    }
   }
 });
 
-client.login(process.env.TOKEN);
+client.login(envs.TOKEN);
