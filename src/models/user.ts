@@ -18,4 +18,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date | null;
+
+  @Column({ type: "timestamp", nullable: true })
+  lastChargeDate: Date | null;
 }

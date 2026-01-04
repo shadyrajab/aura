@@ -10,7 +10,6 @@ export type Envs = {
   POSTGRES_DB: string;
   TOKEN: string;
   AURA_CHANNEL_ID: string;
-  RANKING_CHANNEL_ID: string;
   GUILD_ID: string;
   NODE_ENV?: string;
 };

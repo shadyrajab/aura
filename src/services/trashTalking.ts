@@ -5,7 +5,6 @@ import { User } from "../models/user";
 import { envs } from "../config/envs";
 
 const AURA_CHANNEL_ID = envs.AURA_CHANNEL_ID;
-const RANKING_CHANNEL_ID = envs.RANKING_CHANNEL_ID;
 
 const TRASH_TALK_PHRASES = [
   "Um frango desse não alimenta nem um mendigo... credo.",
@@ -190,44 +189,34 @@ export function setupTrashTalkingCron(client: Client) {
 
       const userRepository = AppDataSource.getRepository(User);
       const allUsers = await userRepository.find();
-
+      
       for (const user of allUsers) {
         if (!user.updatedAt) continue;
 
         const lastUpdate = new Date(user.updatedAt);
         const diffTime = now.getTime() - lastUpdate.getTime();
-        const diffMinutes = Math.floor(diffTime / (1000 * 60));
         const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-        const exactlyOneDayInMinutes = 24 * 60;
-        const isExactly24Hours = diffMinutes >= exactlyOneDayInMinutes && diffMinutes < exactlyOneDayInMinutes + 1;
+        if (diffHours < 24) continue;
 
-        if (isExactly24Hours) {
+        const lastCharge = user.lastChargeDate ? new Date(user.lastChargeDate) : null;
+        const shouldCharge = !lastCharge ||
+          (now.getTime() - lastCharge.getTime()) >= 24 * 60 * 60 * 1000;
+
+        if (shouldCharge) {
           const phrase = getRandomPhrase(ABSENCE_PHRASES)
             .replace("{user}", `<@${user.discordId}>`)
-            .replace("{days}", "1");
+            .replace("{days}", diffDays.toString());
 
           const trashTalk = getRandomPhrase(TRASH_TALK_PHRASES);
 
           await channel.send(`${phrase}\n\n${trashTalk}`);
 
-          console.log(`Cobrança enviada para usuário ${user.discordId} (24h sem treinar)`);
-        } else if (diffDays > 1) {
-          const hoursSinceLastCheck = diffHours % 24;
-          const isNearMidnight = hoursSinceLastCheck === 0;
+          user.lastChargeDate = now;
+          await userRepository.save(user);
 
-          if (isNearMidnight) {
-            const phrase = getRandomPhrase(ABSENCE_PHRASES)
-              .replace("{user}", `<@${user.discordId}>`)
-              .replace("{days}", diffDays.toString());
-
-            const trashTalk = getRandomPhrase(TRASH_TALK_PHRASES);
-
-            await channel.send(`${phrase}\n\n${trashTalk}`);
-
-            console.log(`Cobrança enviada para usuário ${user.discordId} (${diffDays} dias sem treinar)`);
-          }
+          console.log(`Cobrança enviada para usuário ${user.discordId} (${diffDays} dias sem treinar)`);
         }
       }
     } catch (error) {
@@ -239,7 +228,7 @@ export function setupTrashTalkingCron(client: Client) {
 
   cron.schedule("59 23 * * *", async () => {
     try {
-      const channel = await client.channels.fetch(RANKING_CHANNEL_ID);
+      const channel = await client.channels.fetch(AURA_CHANNEL_ID);
       if (!channel || !(channel instanceof TextChannel)) {
         console.error("Canal de ranking não encontrado ou não é TextChannel");
         return;
