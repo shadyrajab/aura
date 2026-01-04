@@ -49,7 +49,6 @@ client.on("ready", async (client) => {
 
 client.on("messageCreate", async (message) => {
   const { channelId, attachments } = message;
-  console.log(channelId)
   if (message.author.bot) return;
   if (channelId !== envs.AURA_CHANNEL_ID) return;
   if (!attachments.size) return;
@@ -98,7 +97,7 @@ client.on("messageCreate", async (message) => {
       },
       {
         name: "**📅 Última farmada:**",
-        value: user.updatedAt!.toLocaleDateString(),
+        value: user.updatedAt!.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }),
         inline: true,
       },
       {

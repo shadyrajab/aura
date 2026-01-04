@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { DataSource } from "typeorm";
 import { User } from "../models/user";
+import { formatRelativeTime } from "../utils/dateUtils";
 
 export const AuraRankingData = {
   name: "topaura",
@@ -33,7 +34,8 @@ export const AuraRankingExecute = async (
       const username = discordUser
         ? discordUser.username
         : `Usuário desconhecido (${user.discordId})`;
-      return `**${index + 1}º** - ${username}: **${user.aura}** aura`;
+      const lastPost = formatRelativeTime(user.updatedAt);
+      return `**${index + 1}º** - ${username}: **${user.aura}** aura (última postagem: ${lastPost})`;
     }),
   );
 
