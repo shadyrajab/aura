@@ -11,6 +11,7 @@ import { WinnersData, WinnersExecute } from "./commands/winners";
 import { StartData, StartExecute } from "./commands/start";
 import { FinishData, FinishExecute } from "./commands/finish";
 import { setupTrashTalkingCron, sendPhotoRoast } from "./services/trashTalking";
+import { seedInitialData } from "./migrations/seedData";
 import { envs } from "./config/envs";
 
 const client = new Client({
@@ -31,8 +32,17 @@ export const AppDataSource = new DataSource({
 
 client.on("ready", async (client) => {
   console.log(`Bot ${client.user.username} is online`);
+
+  console.log("=== VERIFICAÇÃO DE HORÁRIO ===");
+  console.log(`Data/Hora do Servidor: ${new Date().toISOString()}`);
+  console.log(`Data/Hora Local (pt-BR): ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`);
+  console.log(`Timezone do Sistema: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+  console.log("==============================");
+
   client.application.commands.set([AuraRankingData, ClearAuraData, SetAuraData, WinnersData, StartData, FinishData]);
   await AppDataSource.initialize();
+
+  await seedInitialData(AppDataSource);
 
   setupTrashTalkingCron(client);
 });
