@@ -11,8 +11,8 @@ import { WinnersData, WinnersExecute } from "./commands/winners";
 import { StartData, StartExecute } from "./commands/start";
 import { FinishData, FinishExecute } from "./commands/finish";
 import { setupTrashTalkingCron, sendPhotoRoast } from "./services/trashTalking";
-import { seedInitialData } from "./migrations/seedData";
 import { envs } from "./config/envs";
+import { getCurrentDateSaoPaulo } from "./utils/dateUtils";
 
 const client = new Client({
   intents: ["Guilds", "GuildMembers", "GuildMessages", "MessageContent"],
@@ -28,6 +28,8 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   logging: false,
   entities: [User, GuildConfig, Event, Winner],
+  migrations: ["dist/migrations/*.js"],
+  migrationsTableName: "migrations",
 });
 
 client.on("ready", async (client) => {
@@ -42,7 +44,7 @@ client.on("ready", async (client) => {
   client.application.commands.set([AuraRankingData, ClearAuraData, SetAuraData, WinnersData, StartData, FinishData]);
   await AppDataSource.initialize();
 
-  await seedInitialData(AppDataSource);
+  await AppDataSource.runMigrations();
 
   setupTrashTalkingCron(client);
 });
@@ -71,7 +73,7 @@ client.on("messageCreate", async (message) => {
   }
 
   user.aura = (user.aura || 0) + 1;
-  user.updatedAt = new Date();
+  user.updatedAt = getCurrentDateSaoPaulo();
 
   await userRepository.save(user);
 

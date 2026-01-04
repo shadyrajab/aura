@@ -4,6 +4,7 @@ import {
 } from "discord.js";
 import { DataSource } from "typeorm";
 import { User } from "../models/user";
+import { getCurrentDateSaoPaulo } from "../utils/dateUtils";
 
 export const SetAuraData = {
   name: "setaura",
@@ -46,10 +47,11 @@ export const SetAuraExecute = async (
     user = userRepository.create({
       discordId: targetUser.id,
       aura: auraValue,
-      updatedAt: new Date(),
+      updatedAt: getCurrentDateSaoPaulo(),
     });
   } else {
     user.aura = auraValue;
+    user.updatedAt = getCurrentDateSaoPaulo();
   }
 
   await userRepository.save(user);

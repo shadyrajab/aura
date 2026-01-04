@@ -3,6 +3,7 @@ import cron from "node-cron";
 import { AppDataSource } from "..";
 import { User } from "../models/user";
 import { envs } from "../config/envs";
+import { getCurrentDateSaoPaulo } from "../utils/dateUtils";
 
 const AURA_CHANNEL_ID = envs.AURA_CHANNEL_ID;
 
@@ -213,7 +214,7 @@ export function setupTrashTalkingCron(client: Client) {
 
           await channel.send(`${phrase}\n\n${trashTalk}`);
 
-          user.lastChargeDate = now;
+          user.lastChargeDate = getCurrentDateSaoPaulo();
           await userRepository.save(user);
 
           console.log(`Cobrança enviada para usuário ${user.discordId} (${diffDays} dias sem treinar)`);

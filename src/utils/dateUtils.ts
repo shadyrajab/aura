@@ -1,3 +1,7 @@
+export function getCurrentDateSaoPaulo(): Date {
+  return new Date();
+}
+
 export function formatRelativeTime(date: Date | null): string {
   if (!date) {
     return "Nunca";
