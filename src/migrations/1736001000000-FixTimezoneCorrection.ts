@@ -1,16 +1,16 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class FixTimezone1736000000000 implements MigrationInterface {
+export class FixTimezoneCorrection1736001000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       UPDATE "user" 
-      SET "updatedAt" = "updatedAt" - INTERVAL '3 hours'
+      SET "updatedAt" = "updatedAt" - INTERVAL '6 hours'
       WHERE "updatedAt" IS NOT NULL;
     `);
 
     await queryRunner.query(`
       UPDATE "user" 
-      SET "lastChargeDate" = "lastChargeDate" - INTERVAL '3 hours'
+      SET "lastChargeDate" = "lastChargeDate" - INTERVAL '6 hours'
       WHERE "lastChargeDate" IS NOT NULL;
     `);
   }
@@ -18,13 +18,13 @@ export class FixTimezone1736000000000 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       UPDATE "user" 
-      SET "updatedAt" = "updatedAt" + INTERVAL '3 hours'
+      SET "updatedAt" = "updatedAt" + INTERVAL '6 hours'
       WHERE "updatedAt" IS NOT NULL;
     `);
 
     await queryRunner.query(`
       UPDATE "user" 
-      SET "lastChargeDate" = "lastChargeDate" + INTERVAL '3 hours'
+      SET "lastChargeDate" = "lastChargeDate" + INTERVAL '6 hours'
       WHERE "lastChargeDate" IS NOT NULL;
     `);
   }
